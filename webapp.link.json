@@ -5,7 +5,8 @@
     "appServiceSkuName": {
       "type": "string",
       "defaultValue": "S3",
-      "allowedValues": [       
+      "allowedValues": [
+        "S1",
         "S3",
         "P1V2",
         "P2V2",
