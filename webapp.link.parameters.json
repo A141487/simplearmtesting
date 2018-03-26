@@ -1,0 +1,24 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {        
+        "webAppName": {
+            "value": "sitecore"
+        },
+        "app-type": {
+            "value": "web"
+        },
+        "organisation": {
+            "value": "agl"
+        },
+        "environment": {
+            "value": "poc"
+        },
+        "location": {
+            "value": "Australia East"
+        },
+        "appServiceSkuName":{
+            "value":"S1"
+        }
+    }
+}

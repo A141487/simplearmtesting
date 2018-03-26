@@ -1,0 +1,149 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appServiceSkuName": {
+      "type": "string",
+      "defaultValue": "S3",
+      "allowedValues": [       
+        "S3",
+        "P1V2",
+        "P2V2",
+        "P3V2"
+      ],
+      "metadata": {
+        "description": "Describes plan's pricing tier and capacity. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
+      }
+    },
+    "webAppName": {
+        "type": "string"
+    },
+    "app-type": {
+      "type": "string"
+    },
+    "organisation": {
+      "type": "string"
+    },
+    "environment": {
+      "type": "string"
+    },
+    "env-type": {
+      "defaultValue": "cm",
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "website_node_default_version": {
+      "defaultValue": "6.9.1",
+      "type": "string"
+    },
+    "website_load_certificates": {
+      "defaultValue": "*",
+      "type": "string"
+    },
+    "newrelic_home": {
+      "defaultValue": "D:\\Home\\site\\wwwroot\\newrelic",
+      "type": "string"
+    },
+    "newrelic_license_key": {
+      "defaultValue": "xxxxxxxxxxxx",
+      "type": "string"
+    },
+    "cor_enable_profiling": {
+      "defaultValue": "1",
+      "type": "string"
+    },
+    "cor_profiler": {
+      "defaultValue": "{xxxxxxx-7777-xxxxx-9643-7Dxxxxxxx41}",
+      "type": "string"
+    },
+    "cor_profiler_path": {
+      "defaultValue": "D:\\Home\\site\\wwwroot\\newrelic\\NewRelic.Profiler.dll",
+      "type": "string"
+    },
+    "website_time_zone": {
+      "defaultValue": "AUS Eastern Standard Time",
+      "type": "string"
+    },
+    "msdeploy_rename_locked_files": {
+        "defaultValue": "1",
+        "type": "string"
+    },
+    "webjobs_idle_timeout": {
+        "defaultValue": "60000",
+        "type": "string"
+    }
+  },
+  "variables": {
+        "webAppName":"[concat(parameters('webAppName'),'-',parameters('app-type'),'-',parameters('organisation'),'-',parameters('environment'),'-',parameters('env-type'))]",       
+        "hostNames":"[concat(variables('webAppName'),'.azurewebsites.net')]",
+        "hostNamesScm":"[concat(variables('webAppName'),'.scm.azurewebsites.net')]",
+        "appServiceName":"[concat(variables('webAppName'),'-sp')]"
+  },
+  "resources": [
+    {
+      "name": "[variables('appServiceName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "sku": {
+        "name": "[parameters('appServiceSkuName')]"
+      },
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "appService"
+      },
+      "properties": {
+        "name": "[variables('appServiceName')]",
+        "numberOfWorkers": 1
+      }
+    },
+    {
+      "name": "[variables('webAppName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('appServiceName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceId('Microsoft.Web/serverfarms', variables('appServiceName')))]": "Resource",
+        "displayName": "webApp"
+      },
+      "properties": {
+        "name": "[variables('webAppName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServiceName'))]",
+        "clientAffinityEnabled": false,
+        "siteConfig": {
+          "AlwaysOn": true,
+          "use32BitWorkerProcess": false
+          
+        }  
+      },
+        "resources": [    
+        {
+          "name": "appsettings",
+          "type": "config",
+          "apiVersion": "2015-08-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/sites', variables('webAppName'))]"
+          ],
+          "properties": {
+            "WEBSITE_NODE_DEFAULT_VERSION": "[parameters('website_node_default_version')]",
+            "WEBSITE_LOAD_CERTIFICATES": "[parameters('website_load_certificates')]",
+            "NEWRELIC_HOME": "[parameters('newrelic_home')]",
+            "NEW_RELIC_LICENSE_KEY": "[parameters('newrelic_license_key')]",
+            "COR_ENABLE_PROFILING": "[parameters('cor_enable_profiling')]",
+            "COR_PROFILER": "[parameters('cor_profiler')]",
+            "COR_PROFILER_PATH": "[parameters('cor_profiler_path')]",
+            "WEBJOBS_IDLE_TIMEOUT": "[parameters('webjobs_idle_timeout')]"	,	
+            "WEBSITE_TIME_ZONE": "[parameters('website_time_zone')]",
+            "MSDEPLOY_RENAME_LOCKED_FILES": "[parameters('msdeploy_rename_locked_files')]"             	
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {}
+}
